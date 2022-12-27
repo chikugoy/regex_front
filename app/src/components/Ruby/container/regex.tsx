@@ -627,11 +627,13 @@ export const Regex = () => {
     getRedirectResult(auth)
       .then((result) => {
         if (result !== null) {
-          const credential = GoogleAuthProvider.credentialFromResult(result)
-          loginAfter({
-            ...result.user,
-            accessToken: credential?.accessToken
-          } as IUser)
+          (async() => {
+            const token = await result.user.getIdToken(true)
+            loginAfter({
+              ...result.user,
+              accessToken: token
+            } as IUser)
+          })()
           return
         }
       }).catch((error) => {
@@ -644,8 +646,15 @@ export const Regex = () => {
   }, [])
 
   const loginAfter = async (user: IUser) => {
+    const data = {
+      uid: user.uid,
+      displayName: user.displayName,
+      email: user.email,
+      accessToken: user.accessToken,
+    } as IUser;
+
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    const res = await usePostApi('/api/v1/users', user
+    const res = await usePostApi('/api/v1/users', data
     ).catch(err => {
       return err.response
     });

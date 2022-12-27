@@ -626,16 +626,7 @@ export const Regex = () => {
 
     getRedirectResult(auth)
       .then((result) => {
-        if (result !== null) {
-          (async() => {
-            const token = await result.user.getIdToken(true)
-            loginAfter({
-              ...result.user,
-              accessToken: token
-            } as IUser)
-          })()
-          return
-        }
+        getToken(result)
       }).catch((error) => {
       console.error(error)
     })
@@ -644,6 +635,17 @@ export const Regex = () => {
       ignore = true
     }
   }, [])
+
+  const getToken = async (result: any) => {
+    if (!result) {
+      return
+    }
+    const token = await result.user.getIdToken(true)
+    loginAfter({
+      ...result.user,
+      accessToken: token
+    } as IUser)
+  }
 
   const loginAfter = async (user: IUser) => {
     const data = {
